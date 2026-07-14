@@ -1,21 +1,4 @@
 let currentConversation = null;
-let latestProbeResult = null;
-
-const DEBUGGER_VERSION = "1.3";
-const PROBE_TIMEOUT_MS = 8000;
-const URL_PATTERNS = [
-  /\/backend-api\/conversation\/[^/]+/i,
-  /\/backend-api\/.*conversation/i,
-  /\/conversation\/[^/]+\/textdocs/i
-];
-
-function matchesInterestingUrl(url) {
-  return URL_PATTERNS.some((pattern) => pattern.test(url || ""));
-}
-
-function isJsonContentType(contentType) {
-  return /application\/json|text\/json/i.test(contentType || "");
-}
 
 function describeValueShape(value) {
   if (Array.isArray(value)) {
@@ -105,91 +88,6 @@ function summarizeConversationShape(root) {
   };
 }
 
-async function runDebuggerProbe(tabId) {
-  const target = { tabId };
-  const events = [];
-  const requestMap = new Map();
-
-  const listener = async (source, method, params) => {
-    if (source.tabId !== tabId) {
-      return;
-    }
-
-    if (method === "Network.responseReceived") {
-      const url = params.response?.url || "";
-      if (!matchesInterestingUrl(url)) {
-        return;
-      }
-      requestMap.set(params.requestId, {
-        url,
-        status: params.response?.status,
-        contentType: params.response?.mimeType || params.response?.headers?.["content-type"] || "",
-        encodedDataLength: params.response?.encodedDataLength || 0
-      });
-      return;
-    }
-
-    if (method === "Network.loadingFinished") {
-      const request = requestMap.get(params.requestId);
-      if (!request) {
-        return;
-      }
-
-      let bodyInfo = { bodyLength: 0, topLevelKeys: [], jsonLike: false, bodyPreview: "", parsedBody: null };
-      try {
-        const response = await chrome.debugger.sendCommand(target, "Network.getResponseBody", {
-          requestId: params.requestId
-        });
-        const body = response?.body || "";
-        bodyInfo.bodyLength = body.length;
-        bodyInfo.bodyPreview = body.slice(0, 500);
-      if (isJsonContentType(request.contentType)) {
-        try {
-          const parsed = JSON.parse(body);
-          bodyInfo.jsonLike = true;
-          bodyInfo.topLevelKeys = parsed && typeof parsed === "object" ? Object.keys(parsed).slice(0, 20) : [];
-          bodyInfo.parsedBody = parsed;
-          bodyInfo.shapeSummary = summarizeConversationShape(parsed);
-        } catch (_error) {
-          // ignore non-json body parse failures
-        }
-      }
-      } catch (_error) {
-        bodyInfo = { ...bodyInfo, error: "body_unavailable" };
-      }
-
-      events.push({
-        ...request,
-        ...bodyInfo
-      });
-      requestMap.delete(params.requestId);
-    }
-  };
-
-  try {
-    await chrome.debugger.attach(target, DEBUGGER_VERSION);
-    chrome.debugger.onEvent.addListener(listener);
-    await chrome.debugger.sendCommand(target, "Network.enable");
-    await chrome.tabs.reload(tabId);
-    await new Promise((resolve) => setTimeout(resolve, PROBE_TIMEOUT_MS));
-  } finally {
-    chrome.debugger.onEvent.removeListener(listener);
-    try {
-      await chrome.debugger.detach(target);
-    } catch (_error) {
-      // ignore detach failures
-    }
-  }
-
-  latestProbeResult = {
-    capturedAt: new Date().toISOString(),
-    tabId,
-    events
-  };
-
-  return latestProbeResult;
-}
-
 async function fetchChatGptConversationInPage(tabId, conversationId) {
   const results = await chrome.scripting.executeScript({
     target: { tabId },
@@ -254,34 +152,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message?.type === "LLM_HANDOFF_GET_CONVERSATION") {
     sendResponse({ ok: true, conversation: currentConversation });
-    return false;
-  }
-
-  if (message?.type === "LLM_HANDOFF_RUN_DEBUGGER_PROBE") {
-    runDebuggerProbe(message.tabId)
-      .then((result) => sendResponse({ ok: true, result }))
-      .catch((error) => sendResponse({
-        ok: false,
-        error: error instanceof Error ? error.message : "debugger probe failed"
-      }));
-    return true;
-  }
-
-  if (message?.type === "LLM_HANDOFF_GET_DEBUGGER_PROBE") {
-    sendResponse({ ok: true, result: latestProbeResult });
-    return false;
-  }
-
-  if (message?.type === "LLM_HANDOFF_GET_DEBUGGER_CONVERSATION_BODY") {
-    const conversationEvent = latestProbeResult?.events?.find((event) =>
-      /\/backend-api\/conversation\/[^/]+$/i.test(event.url || "")
-      && event.parsedBody
-    ) || null;
-    sendResponse({
-      ok: true,
-      body: conversationEvent?.parsedBody || null,
-      shapeSummary: conversationEvent?.shapeSummary || null
-    });
     return false;
   }
 

@@ -5,7 +5,6 @@
   "description": "ChatGPT / Claude conversations to Markdown for local handoff.",
   "permissions": [
     "activeTab",
-    "debugger",
     "downloads",
     "scripting",
     "storage"

@@ -307,7 +307,7 @@ function extractMessagesFromConversationBody(body) {
       history_expansion_attempts: 0,
       reached_top: true,
       warnings: [],
-      data_source: body?.source || "debugger_conversation_body",
+      data_source: body?.source || "page_api",
       mapping_count: nestedMapping && typeof nestedMapping === "object" ? Object.keys(nestedMapping).length : 0,
       current_node_present: Boolean(nestedCurrentNode),
       conversation_id_match: Boolean(
@@ -769,8 +769,8 @@ function withStrategy(snapshot, strategy) {
   };
 }
 
-function attachDebuggerShape(snapshot, context = {}) {
-  const preferredBody = context.pageConversationBody?.body ? context.pageConversationBody : context.debuggerConversationBody;
+function attachSourceShape(snapshot, context = {}) {
+  const preferredBody = context.pageConversationBody;
   const shapeSummary = preferredBody?.shapeSummary || null;
   const payload = preferredBody?.body || null;
   const nestedMapping = payload ? findFirstObjectByKey(payload, "mapping") : null;
@@ -807,15 +807,7 @@ function extractChatGPTSnapshot(context = {}) {
     source: "page_api"
   });
   if (pageBodySnapshot) {
-    return attachDebuggerShape(withStrategy(pageBodySnapshot, "network"), context);
-  }
-
-  const debuggerBodySnapshot = extractMessagesFromConversationBody({
-    ...(context.debuggerConversationBody || {}),
-    source: "debugger_conversation_body"
-  });
-  if (debuggerBodySnapshot) {
-    return attachDebuggerShape(withStrategy(debuggerBodySnapshot, "network"), context);
+    return attachSourceShape(withStrategy(pageBodySnapshot, "network"), context);
   }
 
   const jsonSnapshot = extractMessagesFromJsonCandidates();

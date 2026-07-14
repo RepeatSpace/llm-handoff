@@ -1,7 +1,6 @@
 let conversation = null;
 let currentMarkdown = "";
 let currentExportConversation = null;
-let debuggerProbe = null;
 let exportHistory = [];
 let pendingExportId = crypto.randomUUID();
 const { buildDownloadFileName, buildMarkdown } = globalThis.LLMHandoffMarkdown;
@@ -18,36 +17,12 @@ async function getConversation() {
   return response?.conversation || null;
 }
 
-async function getDebuggerProbe() {
-  const response = await chrome.runtime.sendMessage({ type: "LLM_HANDOFF_GET_DEBUGGER_PROBE" });
-  return response?.result || null;
-}
-
 function renderMetadata() {
   const meta = document.getElementById("conversation-meta");
   const items = [
-    ["Source", conversation.source],
     ["Title", conversation.title || ""],
-    ["Messages", String(conversation.messages?.length || 0)],
-    ["URL", conversation.url || ""],
-    ["Reached Top", conversation.diagnostics?.reached_top ? "yes" : "no"],
-    ["Snapshots", String(conversation.diagnostics?.snapshot_count || 1)],
-    ["Scroll Root", conversation.diagnostics?.scroll_root || "-"],
-    ["Data Source", conversation.diagnostics?.data_source || "dom"],
-    ["JSON Candidates", String(conversation.diagnostics?.json_candidate_count || 0)],
-    ["Mapping Count", String(conversation.diagnostics?.mapping_count || 0)],
-    ["Current Node", conversation.diagnostics?.current_node_present ? "yes" : "no"],
-    ["Conversation ID Match", conversation.diagnostics?.conversation_id_match ? "yes" : "no"],
-    ["Branch Strategy", conversation.diagnostics?.branch_strategy || "-"],
-    ["Shape Paths", String(conversation.diagnostics?.shape_summary?.interestingPaths?.length || 0)],
-    ["Page API Ready", conversation.diagnostics?.page_api_ready ? "yes" : "no"],
-    ["API Error", conversation.diagnostics?.api_error || "-"],
-    ["Fetch Hits", String(conversation.diagnostics?.network_probe?.fetches?.length || 0)],
-    ["XHR Hits", String(conversation.diagnostics?.network_probe?.xhrs?.length || 0)],
-    ["Resource Hits", String(conversation.diagnostics?.network_probe?.resource_matches?.length || 0)],
-    ["Debugger Hits", String(debuggerProbe?.events?.length || 0)],
-    ["Strategy", conversation.diagnostics?.selector_strategy || "-"],
-    ["Confidence", conversation.extraction?.confidence || "-"]
+    ["Source", conversation.source === "chatgpt" ? "ChatGPT" : "Claude"],
+    ["Messages", String(conversation.messages?.length || 0)]
   ];
 
   meta.replaceChildren(
@@ -64,9 +39,14 @@ function renderMetadata() {
 function renderConfidence() {
   const node = document.getElementById("confidence");
   const confidence = conversation.extraction?.confidence || "unknown";
-  const source = conversation.extraction?.source || "unknown";
-  node.textContent = `Extraction: ${source} / confidence: ${confidence}`;
-  node.style.color = confidence === "verified" ? "#166534" : confidence === "uncertain" ? "#8a4b08" : "#b42318";
+  const labels = {
+    verified: "Verified",
+    uncertain: "要確認",
+    incomplete: "Incomplete",
+    unknown: "Unknown"
+  };
+  node.textContent = labels[confidence] || labels.unknown;
+  node.dataset.confidence = confidence;
 }
 
 function renderWarnings() {
@@ -87,112 +67,6 @@ function renderWarnings() {
       return item;
     })
   );
-}
-
-function renderCandidateResults() {
-  const container = document.getElementById("warnings");
-  const candidates = conversation.diagnostics?.candidate_results || [];
-  const strategies = conversation.diagnostics?.strategy_comparison || [];
-  const networkProbe = conversation.diagnostics?.network_probe || {};
-  const debuggerEvents = debuggerProbe?.events || [];
-  if (candidates.length === 0) {
-    if (
-      strategies.length === 0
-      && !networkProbe.fetches?.length
-      && !networkProbe.xhrs?.length
-      && !networkProbe.resource_matches?.length
-      && debuggerEvents.length === 0
-    ) {
-      return;
-    }
-  }
-
-  if (networkProbe.fetches?.length || networkProbe.xhrs?.length || networkProbe.resource_matches?.length) {
-    const networkTitle = document.createElement("div");
-    networkTitle.textContent = "Network Probe:";
-    networkTitle.style.marginTop = "8px";
-    container.appendChild(networkTitle);
-
-    networkProbe.fetches?.forEach((entry) => {
-      const item = document.createElement("div");
-      item.textContent = `- fetch ${entry.url}`;
-      container.appendChild(item);
-    });
-    networkProbe.xhrs?.forEach((entry) => {
-      const item = document.createElement("div");
-      item.textContent = `- xhr ${entry.method || "GET"} ${entry.url}`;
-      container.appendChild(item);
-    });
-    networkProbe.resource_matches?.forEach((entry) => {
-      const item = document.createElement("div");
-      item.textContent = `- resource ${entry}`;
-      container.appendChild(item);
-    });
-  }
-
-  if (debuggerEvents.length > 0) {
-    const debuggerTitle = document.createElement("div");
-    debuggerTitle.textContent = "Debugger Probe:";
-    debuggerTitle.style.marginTop = "8px";
-    container.appendChild(debuggerTitle);
-
-    debuggerEvents.forEach((entry) => {
-      const item = document.createElement("div");
-      item.textContent =
-        `- ${entry.status || "-"} ${entry.url} / type=${entry.contentType || "-"} / bytes=${entry.bodyLength || entry.encodedDataLength || 0} / keys=${(entry.topLevelKeys || []).join(",")}`;
-      container.appendChild(item);
-    });
-  }
-
-  const shapeSummary = conversation.diagnostics?.shape_summary;
-  if (shapeSummary) {
-    const shapeTitle = document.createElement("div");
-    shapeTitle.textContent = "Conversation Shape:";
-    shapeTitle.style.marginTop = "8px";
-    container.appendChild(shapeTitle);
-
-    (shapeSummary.topLevel || []).slice(0, 12).forEach((entry) => {
-      const item = document.createElement("div");
-      item.textContent = `- top ${entry}`;
-      container.appendChild(item);
-    });
-
-    (shapeSummary.interestingPaths || []).slice(0, 20).forEach((entry) => {
-      const item = document.createElement("div");
-      item.textContent = `- path ${entry}`;
-      container.appendChild(item);
-    });
-  }
-
-  if (strategies.length > 0) {
-    const strategyTitle = document.createElement("div");
-    strategyTitle.textContent = "Strategy Comparison:";
-    strategyTitle.style.marginTop = "8px";
-    container.appendChild(strategyTitle);
-
-    strategies.forEach((strategy) => {
-      const item = document.createElement("div");
-      item.textContent =
-        `- ${strategy.strategy || "-"} / messages=${strategy.messages} / body_length=${strategy.body_length}`;
-      container.appendChild(item);
-    });
-  }
-
-  if (candidates.length === 0) {
-    return;
-  }
-
-  const divider = document.createElement("div");
-  divider.textContent = "Candidate Roots:";
-  divider.style.marginTop = "8px";
-  container.appendChild(divider);
-
-  candidates.forEach((candidate) => {
-    const item = document.createElement("div");
-    item.textContent =
-      `- ${candidate.root} / strategy=${candidate.strategy || "-"} / messages=${candidate.messages} / snapshots=${candidate.snapshots} / reached_top=${candidate.reached_top ? "yes" : "no"}`;
-    container.appendChild(item);
-  });
 }
 
 function messageText(message) {
@@ -426,13 +300,20 @@ function renderRangeSummary(selected) {
 function renderMessageResults() {
   const query = document.getElementById("message-search").value.trim().toLowerCase();
   const userOnly = document.getElementById("user-only").checked;
+  const container = document.getElementById("message-results");
+  if (!query && !userOnly) {
+    container.hidden = true;
+    container.replaceChildren();
+    return;
+  }
+
   const results = conversation.messages
     .map((message, index) => ({ message, number: index + 1, text: messageText(message) }))
     .filter(({ message, text }) => !userOnly || message.role === "user")
     .filter(({ text }) => !query || text.toLowerCase().includes(query))
     .slice(0, 100);
 
-  const container = document.getElementById("message-results");
+  container.hidden = false;
   container.replaceChildren(...results.map(({ message, number, text }) => {
     const row = document.createElement("div");
     row.className = "message-result";
@@ -553,7 +434,6 @@ async function initialize() {
   const stored = await chrome.storage.local.get(["handoffTemplate", "exportHistory"]);
   exportHistory = Array.isArray(stored.exportHistory) ? stored.exportHistory : [];
   conversation = await getConversation();
-  debuggerProbe = await getDebuggerProbe();
 
   if (!conversation) {
     document.getElementById("preview-output").textContent =
@@ -571,7 +451,6 @@ async function initialize() {
   renderHistoryList();
 
   renderWarnings();
-  renderCandidateResults();
   renderMetadata();
   renderConfidence();
   renderMessageResults();

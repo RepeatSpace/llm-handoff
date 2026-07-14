@@ -14,13 +14,6 @@ async function cacheConversation(conversation) {
   });
 }
 
-async function runDebuggerProbe(tabId) {
-  return chrome.runtime.sendMessage({
-    type: "LLM_HANDOFF_RUN_DEBUGGER_PROBE",
-    tabId
-  });
-}
-
 function formatExtractionError(error) {
   const message = error instanceof Error ? error.message : String(error || "");
   if (/Receiving end does not exist/i.test(message)) {
@@ -58,26 +51,6 @@ document.getElementById("extract-button").addEventListener("click", async () => 
 
     await chrome.tabs.create({ url: chrome.runtime.getURL("preview/preview.html") });
     window.close();
-  } catch (error) {
-    setStatus(formatExtractionError(error), true);
-  }
-});
-
-document.getElementById("probe-button").addEventListener("click", async () => {
-  try {
-    const tab = await getActiveTab();
-    if (!tab?.id || !/^https:\/\/chatgpt\.com\//.test(tab.url || "")) {
-      throw new Error("ChatGPT の会話ページで実行してください。");
-    }
-
-    setStatus("通信調査を実行しています… ページを再読み込みします。");
-    const response = await runDebuggerProbe(tab.id);
-    if (!response?.ok) {
-      throw new Error(response?.error || "通信調査に失敗しました。");
-    }
-
-    const count = response.result?.events?.length || 0;
-    setStatus(`通信調査が完了しました。対象レスポンス ${count} 件。`);
   } catch (error) {
     setStatus(formatExtractionError(error), true);
   }

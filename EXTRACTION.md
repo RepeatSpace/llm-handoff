@@ -18,33 +18,27 @@ type ExtractionResult = {
 };
 
 type ExtractionSource =
-  | "network"
-  | "page_state"
-  | "shared_page"
+  | "page_api"
   | "dom_snapshots"
   | "visible_dom";
 ```
 
 `Conversation` は出力対象そのものです。`diagnostics` は取得品質の判定根拠です。
 
-## Extractor Interface
+## Current Extraction Paths
 
-各取得経路は共通のインターフェースを実装する想定です。
+### ChatGPT
 
-```ts
-interface ConversationExtractor {
-  canExtract(context: ExtractionContext): Promise<boolean>;
-  extract(context: ExtractionContext): Promise<ExtractionResult>;
-}
-```
+1. ログイン済みタブから、同一オリジンのWeb UI用会話APIを呼ぶ
+2. 取得した`mapping`を`current_node`から親方向へたどる
+3. 現在表示中の分岐だけを共通のConversation形式へ変換する
+4. API取得に失敗した場合だけDOM snapshotへフォールバックする
 
-オーケストレーターは次の優先順で実行します。
+### Claude
 
-1. `shared_page`
-2. `page_state`
-3. `network`
-4. `dom_snapshots`
-5. `visible_dom`
+1. 現在表示中の会話DOMからターンを抽出する
+2. snapshotを統合し、重複を除いて共通のConversation形式へ変換する
+3. 完全性を証明できないため、現在は`uncertain`として扱う
 
 ## Confidence Levels
 
@@ -80,24 +74,24 @@ interface ConversationExtractor {
 
 既定動作では、`incomplete` は保存不可とします。
 
-## Diagnostics Checklist
+## Diagnostics Policy
 
-調査モードで優先して見る項目は次です。
+取得結果には完全性判定に必要な診断情報を保持しますが、通常のプレビューへ内部情報を常時表示しません。
 
-- request URL
-- request method
-- status
-- content-type
-- response size の概算
-- top-level keys
-- `messages`, `mapping`, `conversation`, `author`, `content` の存在
-- 会話 ID 一致
-- メッセージ件数
-- 親子関係または時系列の再構築可否
-- 表示中の先頭・末尾との一致
-- 再読込、会話切替、過去スクロールでの再現性
+通常UIに表示するもの:
 
-本文全文は既定では調査表示しません。必要時だけ明示有効化します。
+- 取得品質
+- 利用者の判断が必要な警告
+- 会話タイトル、取得元、メッセージ件数
+
+通常UIに表示しないもの:
+
+- 内部JSONの形状
+- selector別の件数
+- network候補
+- snapshotごとのデバッグ情報
+
+詳細情報はMarkdownの診断データや開発時のログで確認します。利用者が判断できない内部情報で、主要操作を埋めないことを優先します。
 
 ## Test Cases
 
@@ -111,7 +105,7 @@ interface ConversationExtractor {
 6. 会話途中からリロードした状態
 7. 共有ページからの取得
 
-## Current Status
+## Implementation Status
 
 ChatGPT通常会話ページでは、Web UI用の `/backend-api/conversation/:id` を主経路にします。取得した `mapping` を `current_node` から親方向へたどり、現在表示中の分岐だけを出力します。API取得に失敗した場合は `dom_snapshots` へフォールバックします。
 
@@ -121,13 +115,4 @@ ChatGPT通常会話ページでは、Web UI用の `/backend-api/conversation/:id
 - APIレスポンスに `mapping` または `current_node` がなければ `verified` にしない
 - DOMフォールバックだけで完全取得を保証しない
 
-## Timebox
-
-`page_state` または `network` から安定した会話データを取る調査には期限を置きます。
-
-目安:
-
-- 2〜3 日調査して安定経路が見つからない
-- 取得できても UI 更新への耐性が低い
-
-この場合は、v0.1 の「完全取得保証」を外し、`uncertain` / `incomplete` を明示する運用を正式仕様にします。
+公開版は`debugger`権限を要求せず、通信調査機能も含みません。取得経路が失敗した場合はDOMフォールバックと信頼度表示で安全側へ倒します。

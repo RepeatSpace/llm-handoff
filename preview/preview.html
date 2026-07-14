@@ -9,11 +9,12 @@
   <body>
     <main class="layout">
       <section class="panel controls">
-        <h1>LLM Handoff Preview</h1>
-        <p class="note">すべての処理はブラウザ内で完結します。外部送信は行いません。</p>
+        <div class="preview-header">
+          <h1>LLM Handoff</h1>
+          <p id="confidence" class="confidence-badge"></p>
+        </div>
         <div id="warnings" class="warnings" hidden></div>
         <dl id="conversation-meta" class="meta"></dl>
-        <p id="confidence" class="note"></p>
         <label class="field">
           <span>Handoff Instructions</span>
           <select id="handoff-preset">
@@ -25,8 +26,8 @@
           </select>
           <textarea id="handoff-input" rows="6"></textarea>
         </label>
-        <section class="project-panel" aria-labelledby="project-heading">
-          <h2 id="project-heading">プロジェクト設定</h2>
+        <details class="project-panel">
+          <summary>プロジェクト設定</summary>
           <label class="field compact-field">
             <span>プロジェクト名</span>
             <input id="project-name" type="text" list="project-names" placeholder="例: llm-handoff">
@@ -63,7 +64,7 @@
             差分の直前にある最大2メッセージを含める
           </label>
           <div id="incremental-status" class="incremental-status" hidden></div>
-        </section>
+        </details>
         <section class="range-panel" aria-labelledby="range-heading">
           <div class="section-heading">
             <h2 id="range-heading">出力範囲</h2>
@@ -84,15 +85,15 @@
           <div id="range-summary" class="range-summary"></div>
           <div id="message-results" class="message-results"></div>
         </section>
-        <section class="history-panel" aria-labelledby="history-heading">
-          <div class="section-heading">
-            <h2 id="history-heading">エクスポート履歴</h2>
+        <details class="history-panel">
+          <summary>エクスポート履歴</summary>
+          <div class="history-actions">
             <button id="clear-history-button" class="small-button danger-button" type="button">全履歴を消去</button>
           </div>
           <p class="field-help">会話本文は保存しません。分類情報とメッセージIDのみを、このブラウザプロファイル内に保存します。</p>
           <p id="history-count" class="field-help"></p>
           <div id="history-list" class="history-list"></div>
-        </section>
+        </details>
         <div class="actions">
           <button id="refresh-button" type="button">プレビューを更新</button>
           <button id="copy-button" type="button">Markdown 全文をコピー</button>

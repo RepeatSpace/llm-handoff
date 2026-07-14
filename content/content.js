@@ -387,7 +387,7 @@ function confidenceFromDiagnostics(messages, diagnostics) {
   const noWarnings = warnings.length === 0;
   const stableEnough = (diagnostics.snapshot_count || 0) >= 3;
   const visibleCovered = messages.length >= (diagnostics.visible_message_count || 0);
-  const trustedSource = ["page_api", "debugger_conversation_body", "shared_page"].includes(diagnostics.data_source);
+  const trustedSource = ["page_api", "shared_page"].includes(diagnostics.data_source);
 
   if (
     diagnostics.data_source === "page_api"
@@ -508,14 +508,6 @@ async function getPageConversationBody() {
   }
 }
 
-async function getDebuggerConversationBody() {
-  const response = await chrome.runtime.sendMessage({ type: "LLM_HANDOFF_GET_DEBUGGER_CONVERSATION_BODY" });
-  return {
-    body: response?.body || null,
-    shapeSummary: response?.shapeSummary || null
-  };
-}
-
 async function collectFromRoot(root, rootLabel, extractor, source, context = {}) {
   const snapshots = [];
   let mergedMessages = [];
@@ -626,10 +618,7 @@ async function extractConversationBySnapshots(extractor, source) {
   let best = null;
   const candidateResults = [];
   const pageConversationBody = source === SOURCE_CHATGPT ? await getPageConversationBody() : null;
-  const context = {
-    pageConversationBody,
-    debuggerConversationBody: source === SOURCE_CHATGPT ? await getDebuggerConversationBody() : null
-  };
+  const context = { pageConversationBody };
 
   if (source === SOURCE_CHATGPT && pageConversationBody?.body) {
     const apiSnapshot = extractor.extractChatGPTSnapshot(context);

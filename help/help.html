@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LLM Handoffの使い方</title>
+    <link rel="stylesheet" href="help.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow">LLM Handoff Guide</p>
+        <h1>会話を、次の作業へ。</h1>
+        <p class="hero-copy">ChatGPTやClaudeの会話をMarkdownにして、Codex、Claude Code、Cursorへ引き継ぎます。処理はブラウザ内で完結します。</p>
+      </div>
+    </header>
+
+    <main>
+      <section aria-labelledby="quick-start">
+        <p class="section-number">01</p>
+        <div class="section-body">
+          <h2 id="quick-start">基本の使い方</h2>
+          <ol class="steps">
+            <li><strong>会話を開く</strong><span>ChatGPTまたはClaudeで、引き継ぎたい会話を表示します。</span></li>
+            <li><strong>会話を取得する</strong><span>ツールバーのLLM Handoffを開き、「現在の会話を取得」を押します。</span></li>
+            <li><strong>範囲を確認する</strong><span>全文、選択範囲、前回以降から必要なメッセージを選びます。</span></li>
+            <li><strong>引き継ぎ指示を書く</strong><span>次のAIに何をしてほしいかを短く指定します。プリセットも利用できます。</span></li>
+            <li><strong>渡す</strong><span>Markdownをダウンロードまたはコピーし、次のAIへ渡します。</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <section aria-labelledby="export-modes">
+        <p class="section-number">02</p>
+        <div class="section-body">
+          <h2 id="export-modes">出力範囲の選び方</h2>
+          <div class="mode-grid">
+            <article>
+              <h3>すべて</h3>
+              <p>会話全体を一次資料として残すときに使います。最初のエクスポートにも適しています。</p>
+            </article>
+            <article>
+              <h3>選択した範囲</h3>
+              <p>話題が変わった長い会話から、今回の作業に必要な部分だけを渡します。</p>
+            </article>
+            <article>
+              <h3>前回以降</h3>
+              <p>同じ会話を継続しているとき、前回の末尾より後に追加された発言だけを出力します。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="quality">
+        <p class="section-number">03</p>
+        <div class="section-body">
+          <h2 id="quality">取得結果の見方</h2>
+          <dl class="quality-list">
+            <div><dt><span class="status verified">Verified</span></dt><dd>会話全体と現在の分岐を確認できています。通常どおり出力できます。</dd></div>
+            <div><dt><span class="status uncertain">要確認</span></dt><dd>欠落の可能性を完全には否定できません。件数とプレビューを確認してください。</dd></div>
+            <div><dt><span class="status incomplete">Incomplete</span></dt><dd>欠落を検出しています。既定では保存せず、会話を再読み込みして取得し直します。</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section aria-labelledby="handoff-tip">
+        <p class="section-number">04</p>
+        <div class="section-body">
+          <h2 id="handoff-tip">良い引き継ぎにする</h2>
+          <div class="tip">
+            <p>引き継ぎ指示には、次に行う作業と優先すべき情報を書きます。</p>
+            <blockquote>この会話の決定事項と制約を確認し、現在のリポジトリと照合して実装の続きを進めてください。完了済みの作業は繰り返さないでください。</blockquote>
+          </div>
+          <p class="privacy"><strong>プライバシー:</strong> 会話本文は外部サーバーやLLM APIへ送信されません。エクスポート履歴にも本文は保存しません。</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

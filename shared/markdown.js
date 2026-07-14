@@ -39,9 +39,6 @@ function buildFrontmatter(conversation) {
     ...(project.tags?.length
       ? ["  tags:", ...project.tags.map((tag) => `    - ${yamlEscape(tag)}`)]
       : ["  tags: []"]),
-    "relation:",
-    `  parent_export_id: ${yamlEscape(project.relation?.parentExportId || "")}`,
-    `  parent_file: ${yamlEscape(project.relation?.parentFileName || "")}`,
     "extraction:",
     `  source: ${conversation.diagnostics?.data_source || conversation.extraction?.source || "unknown"}`,
     `  confidence: ${conversation.extraction?.confidence || "unknown"}`,

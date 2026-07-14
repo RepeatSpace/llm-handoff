@@ -22,15 +22,34 @@
           <ol class="steps">
             <li><strong>会話を開く</strong><span>ChatGPTまたはClaudeで、引き継ぎたい会話を表示します。</span></li>
             <li><strong>会話を取得する</strong><span>ツールバーのLLM Handoffを開き、「現在の会話を取得」を押します。</span></li>
-            <li><strong>範囲を確認する</strong><span>全文、選択範囲、前回以降から必要なメッセージを選びます。</span></li>
+            <li><strong>範囲を確認する</strong><span>全文、選択範囲、前回のダウンロード以降から必要なメッセージを選びます。</span></li>
             <li><strong>引き継ぎ指示を書く</strong><span>次のAIに何をしてほしいかを短く指定します。プリセットも利用できます。</span></li>
             <li><strong>渡す</strong><span>Markdownをダウンロードまたはコピーし、次のAIへ渡します。</span></li>
           </ol>
         </div>
       </section>
 
-      <section aria-labelledby="export-modes">
+      <section aria-labelledby="about-export">
         <p class="section-number">02</p>
+        <div class="section-body">
+          <h2 id="about-export">エクスポートとは</h2>
+          <p class="body-copy">この拡張では、取得した会話をMarkdownとしてダウンロードすることを「エクスポート」と呼びます。ダウンロードしたファイルは、CodexやClaude Codeへ渡したり、Gitで管理したりできます。</p>
+          <div class="export-flow" aria-label="エクスポートの流れ">
+            <span>AIとの会話</span><b aria-hidden="true">→</b><span>Markdown</span><b aria-hidden="true">→</b><span>次の作業</span>
+          </div>
+          <h3 class="subheading">「前回のダウンロード」とは</h3>
+          <p class="body-copy">同じ会話で最後にMarkdownをダウンロードした時点を指します。そのときの末尾メッセージIDをブラウザ内へ記録し、次回はそれより後に増えた発言だけを選べます。</p>
+          <ul class="notes">
+            <li>初回は前回履歴がないため、利用できません。</li>
+            <li>「全文をコピー」しただけでは、前回履歴は更新されません。</li>
+            <li>会話を編集・再生成して分岐が変わり、前回の末尾を確認できない場合は自動選択を停止します。</li>
+            <li>履歴に保存するのはメッセージIDや出力範囲などで、会話本文は保存しません。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="export-modes">
+        <p class="section-number">03</p>
         <div class="section-body">
           <h2 id="export-modes">出力範囲の選び方</h2>
           <div class="mode-grid">
@@ -43,15 +62,53 @@
               <p>話題が変わった長い会話から、今回の作業に必要な部分だけを渡します。</p>
             </article>
             <article>
-              <h3>前回以降</h3>
-              <p>同じ会話を継続しているとき、前回の末尾より後に追加された発言だけを出力します。</p>
+              <h3>前回のダウンロード以降</h3>
+              <p>同じ会話を継続しているとき、最後にダウンロードした末尾より後に追加された発言だけを出力します。</p>
             </article>
           </div>
         </div>
       </section>
 
+      <section aria-labelledby="screen-functions">
+        <p class="section-number">04</p>
+        <div class="section-body">
+          <h2 id="screen-functions">画面の機能</h2>
+          <dl class="feature-list">
+            <div><dt>直前の会話も含める</dt><dd>差分だけでは意味が通じにくい場合に、差分直前の最大2メッセージを参考文脈として追加します。</dd></div>
+            <div><dt>メッセージ検索</dt><dd>開始・終了位置を見つけるための検索です。「ユーザーメッセージだけ表示」で候補を絞れます。検索しただけでは範囲は変わらず、「開始」「終了」を押すと反映されます。</dd></div>
+            <div><dt>件数・トークン・容量</dt><dd>選択範囲の大きさを確認する目安です。トークン数は文字数から計算した概算です。</dd></div>
+            <div><dt>次のAIへの指示</dt><dd>Markdown冒頭の<code>Handoff Instructions</code>へ入ります。プリセットを選んだあとも自由に編集できます。</dd></div>
+            <div><dt>Markdownをダウンロード</dt><dd>ファイルを保存し、同じ会話で次回の差分を判定するための履歴を更新します。</dd></div>
+            <div><dt>全文をコピー</dt><dd>現在のMarkdownをクリップボードへ入れます。ファイル保存と差分履歴の更新は行いません。</dd></div>
+            <div><dt>エクスポート履歴</dt><dd>過去のダウンロード日時、分類、範囲、末尾IDをブラウザ内へ最大500件保存します。履歴を削除しても、保存済みファイルは削除されません。</dd></div>
+            <div><dt>右側のタブ</dt><dd>生成されるMarkdownと、この使い方を切り替えます。</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section aria-labelledby="classification">
+        <p class="section-number">05</p>
+        <div class="section-body">
+          <h2 id="classification">プロジェクト情報とは</h2>
+          <p class="body-copy">プロジェクト名、タグ、会話タイプは、保存したMarkdownを後から探しやすくするための分類情報です。選択しても、会話本文や出力範囲は変わりません。</p>
+          <dl class="classification-list">
+            <div><dt>プロジェクト名</dt><dd>同じ仕事や製品に関する会話へ共通の名前を付けます。例: <code>llm-handoff</code></dd></div>
+            <div><dt>タグ</dt><dd>技術や話題をMarkdownの<code>classification.tags</code>とローカル履歴へ記録します。例: <code>chrome-extension</code>、<code>ui</code>。現在、拡張内でタグ検索や絞り込みは行いません。</dd></div>
+            <div><dt>会話タイプ</dt><dd>会話の目的を一つ選びます。Markdownの<code>classification.type</code>へ記録されます。</dd></div>
+          </dl>
+          <div class="type-list">
+            <span><strong>設計</strong> 仕様や構造を決める</span>
+            <span><strong>実装</strong> コード変更を進める</span>
+            <span><strong>調査</strong> 技術や事実を調べる</span>
+            <span><strong>壁打ち</strong> アイデアを整理する</span>
+            <span><strong>議事録</strong> 会議内容を残す</span>
+            <span><strong>その他</strong> 上記に当てはまらない会話</span>
+          </div>
+        </div>
+      </section>
+
       <section aria-labelledby="quality">
-        <p class="section-number">03</p>
+        <p class="section-number">06</p>
         <div class="section-body">
           <h2 id="quality">取得結果の見方</h2>
           <dl class="quality-list">
@@ -63,7 +120,7 @@
       </section>
 
       <section aria-labelledby="handoff-tip">
-        <p class="section-number">04</p>
+        <p class="section-number">07</p>
         <div class="section-body">
           <h2 id="handoff-tip">良い引き継ぎにする</h2>
           <div class="tip">

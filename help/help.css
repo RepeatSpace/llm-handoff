@@ -106,10 +106,46 @@ h2 {
 .steps span,
 .mode-grid p,
 .quality-list dd,
+.body-copy,
+.notes,
 .privacy {
   color: var(--muted);
   line-height: 1.65;
 }
+
+.body-copy {
+  margin: 0;
+  font-size: 14px;
+}
+
+.export-flow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 26px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.export-flow b {
+  color: var(--accent);
+}
+
+.subheading {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.notes {
+  display: grid;
+  gap: 7px;
+  margin: 16px 0 0;
+  padding-left: 20px;
+  font-size: 13px;
 
 .mode-grid {
   display: grid;
@@ -139,6 +175,69 @@ h2 {
 .quality-list {
   margin: 0;
 }
+
+.classification-list {
+  margin: 22px 0 0;
+}
+
+.feature-list {
+  margin: 0;
+}
+
+.feature-list > div {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 20px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+
+.feature-list dt {
+  font-weight: 700;
+}
+
+.feature-list dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.classification-list > div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 20px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+
+.classification-list dt {
+  font-weight: 700;
+}
+
+.classification-list dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+.type-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.type-list strong {
+  color: var(--ink);
 
 .quality-list > div {
   display: grid;
@@ -214,6 +313,16 @@ blockquote {
     grid-template-columns: 1fr;
   }
 
+  .export-flow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .export-flow b {
+    transform: rotate(90deg);
+  }
+
   .steps li {
     grid-template-columns: 28px minmax(0, 1fr);
   }
@@ -225,5 +334,11 @@ blockquote {
   .quality-list > div {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  .classification-list > div,
+  .feature-list > div,
+  .type-list {
+    grid-template-columns: 1fr;
   }
 }

@@ -83,16 +83,10 @@ function parseTags(value) {
 }
 
 function projectMetadata() {
-  const parentId = document.getElementById("parent-export").value;
-  const parent = exportHistory.find((entry) => entry.exportId === parentId) || null;
   return {
     name: document.getElementById("project-name").value.trim(),
     tags: parseTags(document.getElementById("project-tags").value),
-    type: document.getElementById("conversation-type").value,
-    relation: parent ? {
-      parentExportId: parent.exportId,
-      parentFileName: parent.fileName
-    } : null
+    type: document.getElementById("conversation-type").value
   };
 }
 
@@ -173,7 +167,7 @@ function applyIncrementalMode() {
   }
   if (previousIndex >= conversation.messages.length - 1) {
     checkbox.checked = false;
-    showIncrementalStatus("差分エクスポートを適用できませんでした。\n\n前回のエクスポート以降に新しいメッセージはありません。", true);
+    showIncrementalStatus("差分エクスポートを適用できませんでした。\n\n前回のダウンロード以降に新しいメッセージはありません。", true);
     return;
   }
 
@@ -207,22 +201,6 @@ function renderHistoryOptions() {
     return option;
   }));
 
-  const parentSelect = document.getElementById("parent-export");
-  const empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = "なし";
-  const currentProject = document.getElementById("project-name").value.trim();
-  const options = exportHistory
-    .filter((entry) => currentProject && entry.project === currentProject)
-    .slice()
-    .sort((a, b) => String(b.exportedAt).localeCompare(String(a.exportedAt)))
-    .map((entry) => {
-      const option = document.createElement("option");
-      option.value = entry.exportId;
-      option.textContent = `${String(entry.exportedAt).slice(0, 10)} · ${entry.project || "未分類"} · ${entry.fileName}`;
-      return option;
-    });
-  parentSelect.replaceChildren(empty, ...options);
 }
 
 async function persistHistory() {
@@ -357,17 +335,15 @@ function renderPreview() {
   renderRangeSummary(selected);
 }
 
-function togglePreviewView() {
-  const button = document.getElementById("view-toggle");
+function showPreviewView(view) {
   const output = document.getElementById("preview-output");
   const help = document.getElementById("help-view");
-  const showingHelp = help.hidden;
+  const showingHelp = view === "help";
 
   help.hidden = !showingHelp;
   output.hidden = showingHelp;
-  button.textContent = showingHelp ? "プレビュー" : "使い方";
-  button.setAttribute("aria-pressed", String(showingHelp));
-  document.getElementById("preview-label").textContent = showingHelp ? "Guide" : "Markdown preview";
+  document.getElementById("preview-tab").setAttribute("aria-selected", String(!showingHelp));
+  document.getElementById("help-tab").setAttribute("aria-selected", String(showingHelp));
   document.getElementById("preview-note").textContent = showingHelp ? "基本操作と出力方法" : "編集内容は左側へ反映されます";
 }
 
@@ -426,7 +402,6 @@ async function downloadMarkdown() {
       project: currentExportConversation.project?.name || "",
       tags: currentExportConversation.project?.tags || [],
       type: currentExportConversation.project?.type || "",
-      parentExportId: currentExportConversation.project?.relation?.parentExportId || null,
       fileName: filename,
       rangeStart: currentExportConversation.exportInfo.start,
       rangeEnd: currentExportConversation.exportInfo.end,
@@ -473,7 +448,8 @@ async function initialize() {
 
 document.getElementById("copy-button").addEventListener("click", copyMarkdown);
 document.getElementById("download-button").addEventListener("click", downloadMarkdown);
-document.getElementById("view-toggle").addEventListener("click", togglePreviewView);
+document.getElementById("preview-tab").addEventListener("click", () => showPreviewView("preview"));
+document.getElementById("help-tab").addEventListener("click", () => showPreviewView("help"));
 document.getElementById("handoff-input").addEventListener("input", renderPreview);
 document.getElementById("handoff-preset").addEventListener("change", (event) => {
   const preset = HANDOFF_PRESETS[event.target.value];
@@ -509,8 +485,7 @@ document.getElementById("include-context").addEventListener("change", renderPrev
 [
   "project-name",
   "project-tags",
-  "conversation-type",
-  "parent-export"
+  "conversation-type"
 ].forEach((id) => document.getElementById(id).addEventListener("change", renderPreview));
 document.getElementById("project-name").addEventListener("input", () => {
   renderHistoryOptions();

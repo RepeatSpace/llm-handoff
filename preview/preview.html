@@ -11,10 +11,7 @@
       <section class="panel controls">
         <div class="preview-header">
           <h1>LLM Handoff</h1>
-          <div class="header-actions">
-            <button id="view-toggle" class="help-link" type="button" aria-pressed="false">使い方</button>
-            <p id="confidence" class="confidence-badge"></p>
-          </div>
+          <p id="confidence" class="confidence-badge"></p>
         </div>
         <div id="warnings" class="warnings" hidden></div>
         <dl id="conversation-meta" class="meta"></dl>
@@ -28,7 +25,7 @@
           </div>
           <label class="checkbox-field incremental-toggle">
             <input id="incremental-mode" type="checkbox">
-            前回のエクスポート以降だけを選択
+            前回のダウンロード以降だけを選択
           </label>
           <label class="checkbox-field context-toggle">
             <input id="include-context" type="checkbox" checked disabled>
@@ -81,10 +78,12 @@
             <span>プロジェクト名</span>
             <input id="project-name" type="text" list="project-names" placeholder="例: llm-handoff">
             <datalist id="project-names"></datalist>
+            <span class="field-help">Markdownとローカル履歴へ記録する分類名です。</span>
           </label>
           <label class="field compact-field">
             <span>タグ（カンマまたは改行区切り）</span>
             <textarea id="project-tags" rows="3" placeholder="chrome-extension, markdown"></textarea>
+            <span class="field-help">Markdownとローカル履歴へ記録します。現在、タグ検索や絞り込み機能はありません。</span>
           </label>
           <label class="field compact-field">
             <span>会話タイプ</span>
@@ -97,12 +96,7 @@
               <option value="minutes">議事録</option>
               <option value="other">その他</option>
             </select>
-          </label>
-          <label class="field compact-field">
-            <span>親エクスポート</span>
-            <select id="parent-export">
-              <option value="">なし</option>
-            </select>
+            <span class="field-help">Markdownの分類情報として記録します。出力範囲や内容は変わりません。</span>
           </label>
         </details>
         <details class="history-panel advanced-panel">
@@ -117,11 +111,14 @@
       </section>
       <section class="panel preview">
         <div id="preview-toolbar" class="preview-toolbar">
-          <span id="preview-label">Markdown preview</span>
+          <div class="view-tabs" role="tablist" aria-label="右ペインの表示">
+            <button id="preview-tab" class="view-tab" type="button" role="tab" aria-selected="true" aria-controls="preview-output">Markdown preview</button>
+            <button id="help-tab" class="view-tab" type="button" role="tab" aria-selected="false" aria-controls="help-view">使い方</button>
+          </div>
           <span id="preview-note">編集内容は左側へ反映されます</span>
         </div>
-        <pre id="preview-output" tabindex="0"></pre>
-        <iframe id="help-view" class="help-view" src="../help/help.html" title="LLM Handoffの使い方" hidden></iframe>
+        <pre id="preview-output" tabindex="0" role="tabpanel" aria-labelledby="preview-tab"></pre>
+        <iframe id="help-view" class="help-view" src="../help/help.html" title="LLM Handoffの使い方" role="tabpanel" aria-labelledby="help-tab" hidden></iframe>
       </section>
     </main>
     <script src="../shared/types.js"></script>

@@ -357,6 +357,20 @@ function renderPreview() {
   renderRangeSummary(selected);
 }
 
+function togglePreviewView() {
+  const button = document.getElementById("view-toggle");
+  const output = document.getElementById("preview-output");
+  const help = document.getElementById("help-view");
+  const showingHelp = help.hidden;
+
+  help.hidden = !showingHelp;
+  output.hidden = showingHelp;
+  button.textContent = showingHelp ? "プレビュー" : "使い方";
+  button.setAttribute("aria-pressed", String(showingHelp));
+  document.getElementById("preview-label").textContent = showingHelp ? "Guide" : "Markdown preview";
+  document.getElementById("preview-note").textContent = showingHelp ? "基本操作と出力方法" : "編集内容は左側へ反映されます";
+}
+
 async function copyMarkdown() {
   renderPreview();
 
@@ -459,6 +473,7 @@ async function initialize() {
 
 document.getElementById("copy-button").addEventListener("click", copyMarkdown);
 document.getElementById("download-button").addEventListener("click", downloadMarkdown);
+document.getElementById("view-toggle").addEventListener("click", togglePreviewView);
 document.getElementById("handoff-input").addEventListener("input", renderPreview);
 document.getElementById("handoff-preset").addEventListener("change", (event) => {
   const preset = HANDOFF_PRESETS[event.target.value];

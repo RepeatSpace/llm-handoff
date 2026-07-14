@@ -12,7 +12,7 @@
         <div class="preview-header">
           <h1>LLM Handoff</h1>
           <div class="header-actions">
-            <a class="help-link" href="../help/help.html" target="_blank" rel="noreferrer">使い方</a>
+            <button id="view-toggle" class="help-link" type="button" aria-pressed="false">使い方</button>
             <p id="confidence" class="confidence-badge"></p>
           </div>
         </div>
@@ -116,11 +116,12 @@
         </details>
       </section>
       <section class="panel preview">
-        <div class="preview-toolbar">
-          <span>Markdown preview</span>
-          <span>編集内容は左側へ反映されます</span>
+        <div id="preview-toolbar" class="preview-toolbar">
+          <span id="preview-label">Markdown preview</span>
+          <span id="preview-note">編集内容は左側へ反映されます</span>
         </div>
         <pre id="preview-output" tabindex="0"></pre>
+        <iframe id="help-view" class="help-view" src="../help/help.html" title="LLM Handoffの使い方" hidden></iframe>
       </section>
     </main>
     <script src="../shared/types.js"></script>

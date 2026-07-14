@@ -17,6 +17,8 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
+  font-size: 16px;
+  line-height: 1.8;
 }
 
 .hero {
@@ -37,7 +39,7 @@ main {
 .eyebrow,
 .section-number {
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -53,8 +55,8 @@ h1 {
 .hero-copy {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.8;
 }
 
 main {
@@ -74,8 +76,9 @@ section {
 }
 
 h2 {
-  margin: 0 0 28px;
-  font-size: 27px;
+  margin: 0 0 24px;
+  font-size: 25px;
+  line-height: 1.4;
   letter-spacing: -0.04em;
 }
 
@@ -100,7 +103,7 @@ h2 {
 .steps li::before {
   content: counter(steps, decimal-leading-zero);
   color: var(--accent);
-  font: 700 11px/1.5 ui-monospace, monospace;
+  font: 700 12px/1.8 ui-monospace, monospace;
 }
 
 .steps span,
@@ -110,12 +113,12 @@ h2 {
 .notes,
 .privacy {
   color: var(--muted);
-  line-height: 1.65;
+  line-height: 1.8;
 }
 
 .body-copy {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .export-flow {
@@ -127,7 +130,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -137,7 +140,7 @@ h2 {
 
 .subheading {
   margin: 0 0 8px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .notes {
@@ -145,7 +148,8 @@ h2 {
   gap: 7px;
   margin: 16px 0 0;
   padding-left: 20px;
-  font-size: 13px;
+  font-size: 15px;
+}
 
 .mode-grid {
   display: grid;
@@ -164,12 +168,13 @@ h2 {
 
 .mode-grid h3 {
   margin: 0 0 10px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .mode-grid p {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 .quality-list {
@@ -185,41 +190,37 @@ h2 {
 }
 
 .feature-list > div {
-  display: grid;
-  grid-template-columns: 190px minmax(0, 1fr);
-  gap: 20px;
-  padding: 13px 0;
+  padding: 16px 0;
   border-top: 1px solid var(--line);
 }
 
 .feature-list dt {
+  margin: 0 0 5px;
   font-weight: 700;
 }
 
 .feature-list dd {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 .classification-list > div {
-  display: grid;
-  grid-template-columns: 130px minmax(0, 1fr);
-  gap: 20px;
-  padding: 13px 0;
+  padding: 16px 0;
   border-top: 1px solid var(--line);
 }
 
 .classification-list dt {
+  margin: 0 0 5px;
   font-weight: 700;
 }
 
 .classification-list dd {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 code {
@@ -233,30 +234,34 @@ code {
   gap: 8px 20px;
   margin-top: 18px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 .type-list strong {
   color: var(--ink);
+}
 
 .quality-list > div {
-  display: grid;
-  grid-template-columns: 130px minmax(0, 1fr);
-  gap: 20px;
-  padding: 15px 0;
+  padding: 16px 0;
   border-top: 1px solid var(--line);
+}
+
+.quality-list dt {
+  margin: 0 0 7px;
 }
 
 .quality-list dd {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 .status {
   display: inline-block;
   padding: 5px 9px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 750;
 }
 
@@ -289,13 +294,13 @@ blockquote {
   margin: 0;
   color: #38423d;
   font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.9;
 }
 
 .privacy {
   margin: 20px 0 0;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 @media (max-width: 700px) {
@@ -331,13 +336,6 @@ blockquote {
     grid-column: 2;
   }
 
-  .quality-list > div {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .classification-list > div,
-  .feature-list > div,
   .type-list {
     grid-template-columns: 1fr;
   }

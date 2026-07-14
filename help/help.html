@@ -78,7 +78,7 @@
             <div><dt>メッセージ検索</dt><dd>開始・終了位置を見つけるための検索です。「ユーザーメッセージだけ表示」で候補を絞れます。検索しただけでは範囲は変わらず、「開始」「終了」を押すと反映されます。</dd></div>
             <div><dt>件数・トークン・容量</dt><dd>選択範囲の大きさを確認する目安です。トークン数は文字数から計算した概算です。</dd></div>
             <div><dt>次のAIへの指示</dt><dd>Markdown冒頭の<code>Handoff Instructions</code>へ入ります。プリセットを選んだあとも自由に編集できます。</dd></div>
-            <div><dt>Markdownをダウンロード</dt><dd>ファイルを保存し、同じ会話で次回の差分を判定するための履歴を更新します。</dd></div>
+            <div><dt>Markdownをダウンロード</dt><dd>Chromeの保存ダイアログが開きます。保存先とファイル名を選んでください。Chromeの設定によっては、既定のダウンロードフォルダが最初に表示されます。保存後、同じ会話で次回の差分を判定するための履歴を更新します。</dd></div>
             <div><dt>全文をコピー</dt><dd>現在のMarkdownをクリップボードへ入れます。ファイル保存と差分履歴の更新は行いません。</dd></div>
             <div><dt>エクスポート履歴</dt><dd>過去のダウンロード日時、分類、範囲、末尾IDをブラウザ内へ最大500件保存します。履歴を削除しても、保存済みファイルは削除されません。</dd></div>
             <div><dt>右側のタブ</dt><dd>生成されるMarkdownと、この使い方を切り替えます。</dd></div>
@@ -90,10 +90,9 @@
         <p class="section-number">05</p>
         <div class="section-body">
           <h2 id="classification">プロジェクト情報とは</h2>
-          <p class="body-copy">プロジェクト名、タグ、会話タイプは、保存したMarkdownを後から探しやすくするための分類情報です。選択しても、会話本文や出力範囲は変わりません。</p>
+          <p class="body-copy">プロジェクト名と会話タイプは、Markdownへ付加する分類情報です。選択しても、会話本文や出力範囲は変わりません。拡張は保存先のファイルを管理しないため、これらの情報からダウンロード済みファイルを検索することはできません。</p>
           <dl class="classification-list">
             <div><dt>プロジェクト名</dt><dd>同じ仕事や製品に関する会話へ共通の名前を付けます。例: <code>llm-handoff</code></dd></div>
-            <div><dt>タグ</dt><dd>技術や話題をMarkdownの<code>classification.tags</code>とローカル履歴へ記録します。例: <code>chrome-extension</code>、<code>ui</code>。現在、拡張内でタグ検索や絞り込みは行いません。</dd></div>
             <div><dt>会話タイプ</dt><dd>会話の目的を一つ選びます。Markdownの<code>classification.type</code>へ記録されます。</dd></div>
           </dl>
           <div class="type-list">

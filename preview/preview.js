@@ -73,19 +73,9 @@ function messageText(message) {
   return (message.content || []).map((block) => block.value || "").join("\n\n");
 }
 
-function parseTags(value) {
-  return Array.from(new Set(
-    String(value || "")
-      .split(/[,\n]/)
-      .map((tag) => tag.trim())
-      .filter(Boolean)
-  ));
-}
-
 function projectMetadata() {
   return {
     name: document.getElementById("project-name").value.trim(),
-    tags: parseTags(document.getElementById("project-tags").value),
     type: document.getElementById("conversation-type").value
   };
 }
@@ -234,9 +224,6 @@ function renderHistoryList() {
         option.selected = entry.type === value;
         typeSelect.appendChild(option);
       });
-    const tagsInput = document.createElement("input");
-    tagsInput.value = (entry.tags || []).join(", ");
-    tagsInput.placeholder = "タグ";
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "small-button danger-button";
@@ -245,18 +232,16 @@ function renderHistoryList() {
     const update = async () => {
       entry.project = projectInput.value.trim();
       entry.type = typeSelect.value;
-      entry.tags = parseTags(tagsInput.value);
       await persistHistory();
     };
     projectInput.addEventListener("change", update);
     typeSelect.addEventListener("change", update);
-    tagsInput.addEventListener("change", update);
     deleteButton.addEventListener("click", async () => {
       if (!window.confirm("このエクスポート履歴を削除しますか。会話ファイル自体は削除されません。")) return;
       exportHistory = exportHistory.filter((candidate) => candidate.exportId !== entry.exportId);
       await persistHistory();
     });
-    fields.append(projectInput, typeSelect, tagsInput, deleteButton);
+    fields.append(projectInput, typeSelect, deleteButton);
     item.append(title, fields);
     return item;
   }));
@@ -400,7 +385,6 @@ async function downloadMarkdown() {
       sourceUrl: currentExportConversation.url,
       title: currentExportConversation.title,
       project: currentExportConversation.project?.name || "",
-      tags: currentExportConversation.project?.tags || [],
       type: currentExportConversation.project?.type || "",
       fileName: filename,
       rangeStart: currentExportConversation.exportInfo.start,
@@ -484,7 +468,6 @@ document.getElementById("incremental-mode").addEventListener("change", applyIncr
 document.getElementById("include-context").addEventListener("change", renderPreview);
 [
   "project-name",
-  "project-tags",
   "conversation-type"
 ].forEach((id) => document.getElementById(id).addEventListener("change", renderPreview));
 document.getElementById("project-name").addEventListener("input", () => {

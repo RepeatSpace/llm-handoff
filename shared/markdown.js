@@ -36,9 +36,6 @@ function buildFrontmatter(conversation) {
     "classification:",
     `  project: ${yamlEscape(project.name || "")}`,
     `  type: ${yamlEscape(project.type || "")}`,
-    ...(project.tags?.length
-      ? ["  tags:", ...project.tags.map((tag) => `    - ${yamlEscape(tag)}`)]
-      : ["  tags: []"]),
     "extraction:",
     `  source: ${conversation.diagnostics?.data_source || conversation.extraction?.source || "unknown"}`,
     `  confidence: ${conversation.extraction?.confidence || "unknown"}`,

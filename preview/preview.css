@@ -414,7 +414,7 @@ button {
 
 .history-fields {
   display: grid;
-  grid-template-columns: 1fr 105px;
+  grid-template-columns: minmax(0, 1fr) 105px auto;
   gap: 6px;
 }
 

@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+  font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: linear-gradient(180deg, #f4f1ea 0%, #ece8dd 100%);
+  color: #1f1b16;
+}
+
+.popup {
+  width: 320px;
+  padding: 20px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.lead {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: #1f5eff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #194ed4;
+}
+
+.secondary {
+  margin-top: 10px;
+  background: #d7d0c3;
+  color: #2b241b;
+}
+
+.secondary:hover {
+  background: #c8c0b0;
+}
+
+.status {
+  min-height: 20px;
+  margin: 12px 0 0;
+  font-size: 12px;
+}

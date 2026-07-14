@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LLM Handoff Preview</title>
+    <link rel="stylesheet" href="preview.css">
+  </head>
+  <body>
+    <main class="layout">
+      <section class="panel controls">
+        <h1>LLM Handoff Preview</h1>
+        <p class="note">すべての処理はブラウザ内で完結します。外部送信は行いません。</p>
+        <div id="warnings" class="warnings" hidden></div>
+        <dl id="conversation-meta" class="meta"></dl>
+        <p id="confidence" class="note"></p>
+        <label class="field">
+          <span>Handoff Instructions</span>
+          <select id="handoff-preset">
+            <option value="">プリセットを選択</option>
+            <option value="continue">続きから作業する</option>
+            <option value="organize">まず整理する</option>
+            <option value="codex">Codex向け</option>
+            <option value="claude-code">Claude Code向け</option>
+          </select>
+          <textarea id="handoff-input" rows="6"></textarea>
+        </label>
+        <section class="project-panel" aria-labelledby="project-heading">
+          <h2 id="project-heading">プロジェクト設定</h2>
+          <label class="field compact-field">
+            <span>プロジェクト名</span>
+            <input id="project-name" type="text" list="project-names" placeholder="例: llm-handoff">
+            <datalist id="project-names"></datalist>
+          </label>
+          <label class="field compact-field">
+            <span>タグ（カンマまたは改行区切り）</span>
+            <textarea id="project-tags" rows="3" placeholder="chrome-extension, markdown"></textarea>
+          </label>
+          <label class="field compact-field">
+            <span>会話タイプ</span>
+            <select id="conversation-type">
+              <option value="">未指定</option>
+              <option value="design">設計</option>
+              <option value="implementation">実装</option>
+              <option value="research">調査</option>
+              <option value="brainstorming">壁打ち</option>
+              <option value="minutes">議事録</option>
+              <option value="other">その他</option>
+            </select>
+          </label>
+          <label class="field compact-field">
+            <span>親エクスポート</span>
+            <select id="parent-export">
+              <option value="">なし</option>
+            </select>
+          </label>
+          <label class="checkbox-field">
+            <input id="incremental-mode" type="checkbox">
+            この会話の前回エクスポート以降だけを選択
+          </label>
+          <label class="checkbox-field">
+            <input id="include-context" type="checkbox" checked disabled>
+            差分の直前にある最大2メッセージを含める
+          </label>
+          <div id="incremental-status" class="incremental-status" hidden></div>
+        </section>
+        <section class="range-panel" aria-labelledby="range-heading">
+          <div class="section-heading">
+            <h2 id="range-heading">出力範囲</h2>
+            <button id="reset-range-button" class="small-button" type="button">全文へ戻す</button>
+          </div>
+          <div class="range-inputs">
+            <label>開始 <input id="range-start" type="number" min="1"></label>
+            <label>終了 <input id="range-end" type="number" min="1"></label>
+          </div>
+          <label class="field compact-field">
+            <span>メッセージを検索</span>
+            <input id="message-search" type="search" placeholder="キーワードを入力">
+          </label>
+          <label class="checkbox-field">
+            <input id="user-only" type="checkbox">
+            ユーザーメッセージだけ表示
+          </label>
+          <div id="range-summary" class="range-summary"></div>
+          <div id="message-results" class="message-results"></div>
+        </section>
+        <section class="history-panel" aria-labelledby="history-heading">
+          <div class="section-heading">
+            <h2 id="history-heading">エクスポート履歴</h2>
+            <button id="clear-history-button" class="small-button danger-button" type="button">全履歴を消去</button>
+          </div>
+          <p class="field-help">会話本文は保存しません。分類情報とメッセージIDのみを、このブラウザプロファイル内に保存します。</p>
+          <p id="history-count" class="field-help"></p>
+          <div id="history-list" class="history-list"></div>
+        </section>
+        <div class="actions">
+          <button id="refresh-button" type="button">プレビューを更新</button>
+          <button id="copy-button" type="button">Markdown 全文をコピー</button>
+          <button id="download-button" type="button">Markdown をダウンロード</button>
+        </div>
+        <p id="copy-status" class="action-status" role="status" aria-live="polite"></p>
+      </section>
+      <section class="panel preview">
+        <pre id="preview-output"></pre>
+      </section>
+    </main>
+    <script src="../shared/types.js"></script>
+    <script src="../shared/dom.js"></script>
+    <script src="../shared/markdown.js"></script>
+    <script src="preview.js"></script>
+  </body>
+  </html>

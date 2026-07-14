@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "LLM Handoff",
+  "version": "0.3.0",
+  "description": "ChatGPT / Claude conversations to Markdown for local handoff.",
+  "permissions": [
+    "activeTab",
+    "debugger",
+    "downloads",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://claude.ai/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "LLM Handoff"
+  },
+  "background": {
+    "service_worker": "background/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*"
+      ],
+      "js": [
+        "content/probe.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://claude.ai/*"
+      ],
+      "js": [
+        "shared/types.js",
+        "shared/dom.js",
+        "extractors/chatgpt.js",
+        "extractors/claude.js",
+        "content/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "shared/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

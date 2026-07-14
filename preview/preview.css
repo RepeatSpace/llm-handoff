@@ -286,26 +286,22 @@ textarea {
   line-height: 1.5;
 }
 
-.message-picker,
-.advanced-panel {
+.message-picker {
   margin-top: 13px;
 }
 
-.message-picker > summary,
-.advanced-panel > summary {
+.message-picker > summary {
   color: var(--muted);
   font-size: 12px;
   font-weight: 650;
 }
 
-.message-picker[open] > summary,
-.advanced-panel[open] > summary {
+.message-picker[open] > summary {
   margin-bottom: 12px;
   color: var(--ink);
 }
 
-.message-results,
-.history-list {
+.message-results {
   max-height: 280px;
   margin-top: 8px;
   overflow: auto;
@@ -334,7 +330,6 @@ button {
 }
 
 .text-button,
-.small-button,
 .message-result button {
   padding: 6px 8px;
   background: transparent;
@@ -343,7 +338,6 @@ button {
 }
 
 .text-button:hover,
-.small-button:hover,
 .message-result button:hover {
   background: var(--accent-soft);
 }
@@ -380,46 +374,6 @@ button {
   margin: 7px 0 0;
   color: var(--muted);
   font-size: 11px;
-}
-
-.advanced-panel {
-  padding-top: 15px;
-  border-top: 1px solid var(--line);
-}
-
-.history-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.field-help {
-  margin: 7px 0 0;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.45;
-}
-
-.history-item {
-  display: grid;
-  gap: 7px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.history-title {
-  overflow-wrap: anywhere;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.history-fields {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 105px auto;
-  gap: 6px;
-}
-
-.danger-button {
-  color: var(--danger);
 }
 
 .preview-toolbar {

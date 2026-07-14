@@ -16,7 +16,6 @@
 
     <main>
       <section aria-labelledby="quick-start">
-        <p class="section-number">01</p>
         <div class="section-body">
           <h2 id="quick-start">基本の使い方</h2>
           <ol class="steps">
@@ -30,7 +29,6 @@
       </section>
 
       <section aria-labelledby="about-export">
-        <p class="section-number">02</p>
         <div class="section-body">
           <h2 id="about-export">エクスポートとは</h2>
           <p class="body-copy">この拡張では、取得した会話をMarkdownとしてダウンロードすることを「エクスポート」と呼びます。ダウンロードしたファイルは、CodexやClaude Codeへ渡したり、Gitで管理したりできます。</p>
@@ -40,16 +38,15 @@
           <h3 class="subheading">「前回のダウンロード」とは</h3>
           <p class="body-copy">同じ会話で最後にMarkdownをダウンロードした時点を指します。そのときの末尾メッセージIDをブラウザ内へ記録し、次回はそれより後に増えた発言だけを選べます。</p>
           <ul class="notes">
-            <li>初回は前回履歴がないため、利用できません。</li>
-            <li>「全文をコピー」しただけでは、前回履歴は更新されません。</li>
+            <li>初回はこのブラウザ内に前回の位置がないため、利用できません。</li>
+            <li>「全文をコピー」しただけでは、前回の位置は更新されません。</li>
             <li>会話を編集・再生成して分岐が変わり、前回の末尾を確認できない場合は自動選択を停止します。</li>
-            <li>履歴に保存するのはメッセージIDや出力範囲などで、会話本文は保存しません。</li>
+            <li>この拡張がブラウザ内に保存するのは、会話ID、最後のメッセージID、日時だけです。会話本文やMarkdownファイル本体は保存しません。</li>
           </ul>
         </div>
       </section>
 
       <section aria-labelledby="export-modes">
-        <p class="section-number">03</p>
         <div class="section-body">
           <h2 id="export-modes">出力範囲の選び方</h2>
           <div class="mode-grid">
@@ -70,7 +67,6 @@
       </section>
 
       <section aria-labelledby="screen-functions">
-        <p class="section-number">04</p>
         <div class="section-body">
           <h2 id="screen-functions">画面の機能</h2>
           <dl class="feature-list">
@@ -78,36 +74,15 @@
             <div><dt>メッセージ検索</dt><dd>開始・終了位置を見つけるための検索です。「ユーザーメッセージだけ表示」で候補を絞れます。検索しただけでは範囲は変わらず、「開始」「終了」を押すと反映されます。</dd></div>
             <div><dt>件数・トークン・容量</dt><dd>選択範囲の大きさを確認する目安です。トークン数は文字数から計算した概算です。</dd></div>
             <div><dt>次のAIへの指示</dt><dd>Markdown冒頭の<code>Handoff Instructions</code>へ入ります。プリセットを選んだあとも自由に編集できます。</dd></div>
-            <div><dt>Markdownをダウンロード</dt><dd>Chromeの保存ダイアログが開きます。保存先とファイル名を選んでください。Chromeの設定によっては、既定のダウンロードフォルダが最初に表示されます。保存後、同じ会話で次回の差分を判定するための履歴を更新します。</dd></div>
-            <div><dt>全文をコピー</dt><dd>現在のMarkdownをクリップボードへ入れます。ファイル保存と差分履歴の更新は行いません。</dd></div>
-            <div><dt>エクスポート履歴</dt><dd>過去のダウンロード日時、分類、範囲、末尾IDをブラウザ内へ最大500件保存します。履歴を削除しても、保存済みファイルは削除されません。</dd></div>
-            <div><dt>右側のタブ</dt><dd>生成されるMarkdownと、この使い方を切り替えます。</dd></div>
+            <div><dt>Markdownをダウンロード</dt><dd>Chromeの保存ダイアログが開きます。保存先とファイル名を選んでください。「今回の位置を記憶する」が有効なら、同じ会話で次回の差分を判定できるようになります。</dd></div>
+            <div><dt>全文をコピー</dt><dd>現在のMarkdownをクリップボードへ入れます。ファイル保存と前回位置の更新は行いません。</dd></div>
+            <div><dt>今回の位置を記憶する</dt><dd>会話ごとに、最後にダウンロードしたメッセージIDと日時だけを<code>chrome.storage.local</code>へ保存します。履歴一覧は作らず、会話本文やファイルの保存先も記録しません。端末間では同期されません。</dd></div>
+            <div><dt>Markdown preview／使い方</dt><dd>プレビュー領域の上部にあるタブです。生成されるMarkdownと、この使い方を切り替えます。</dd></div>
           </dl>
-        </div>
-      </section>
-
-      <section aria-labelledby="classification">
-        <p class="section-number">05</p>
-        <div class="section-body">
-          <h2 id="classification">プロジェクト情報とは</h2>
-          <p class="body-copy">プロジェクト名と会話タイプは、Markdownへ付加する分類情報です。選択しても、会話本文や出力範囲は変わりません。拡張は保存先のファイルを管理しないため、これらの情報からダウンロード済みファイルを検索することはできません。</p>
-          <dl class="classification-list">
-            <div><dt>プロジェクト名</dt><dd>同じ仕事や製品に関する会話へ共通の名前を付けます。例: <code>llm-handoff</code></dd></div>
-            <div><dt>会話タイプ</dt><dd>会話の目的を一つ選びます。Markdownの<code>classification.type</code>へ記録されます。</dd></div>
-          </dl>
-          <div class="type-list">
-            <span><strong>設計</strong> 仕様や構造を決める</span>
-            <span><strong>実装</strong> コード変更を進める</span>
-            <span><strong>調査</strong> 技術や事実を調べる</span>
-            <span><strong>壁打ち</strong> アイデアを整理する</span>
-            <span><strong>議事録</strong> 会議内容を残す</span>
-            <span><strong>その他</strong> 上記に当てはまらない会話</span>
-          </div>
         </div>
       </section>
 
       <section aria-labelledby="quality">
-        <p class="section-number">06</p>
         <div class="section-body">
           <h2 id="quality">取得結果の見方</h2>
           <dl class="quality-list">
@@ -119,14 +94,13 @@
       </section>
 
       <section aria-labelledby="handoff-tip">
-        <p class="section-number">07</p>
         <div class="section-body">
           <h2 id="handoff-tip">良い引き継ぎにする</h2>
           <div class="tip">
             <p>引き継ぎ指示には、次に行う作業と優先すべき情報を書きます。</p>
             <blockquote>この会話の決定事項と制約を確認し、現在のリポジトリと照合して実装の続きを進めてください。完了済みの作業は繰り返さないでください。</blockquote>
           </div>
-          <p class="privacy"><strong>プライバシー:</strong> 会話本文は外部サーバーやLLM APIへ送信されません。エクスポート履歴にも本文は保存しません。</p>
+          <p class="privacy"><strong>プライバシー:</strong> 会話本文は外部サーバーやLLM APIへ送信されません。差分出力のために記憶する情報にも、会話本文は含まれません。</p>
         </div>
       </section>
     </main>

@@ -1,8 +1,7 @@
 let conversation = null;
 let currentMarkdown = "";
 let currentExportConversation = null;
-let exportHistory = [];
-let pendingExportId = crypto.randomUUID();
+let exportPositions = {};
 const { buildDownloadFileName, buildMarkdown } = globalThis.LLMHandoffMarkdown;
 const { CONFIDENCE_INCOMPLETE, CONFIDENCE_UNCERTAIN } = globalThis.LLMHandoffTypes || {};
 const HANDOFF_PRESETS = {
@@ -73,11 +72,9 @@ function messageText(message) {
   return (message.content || []).map((block) => block.value || "").join("\n\n");
 }
 
-function projectMetadata() {
-  return {
-    name: document.getElementById("project-name").value.trim(),
-    type: document.getElementById("conversation-type").value
-  };
+function conversationKey(source = conversation.source, url = conversation.url) {
+  const id = String(url || "").match(/\/(?:c|chat)\/([^/?#]+)/)?.[1] || String(url || "");
+  return `${source}:${id}`;
 }
 
 function normalizedRange() {
@@ -104,9 +101,7 @@ function selectedConversation() {
     ...conversation,
     messages,
     attachments: messages.flatMap((message) => message.attachments || []),
-    project: projectMetadata(),
     exportInfo: {
-      exportId: pendingExportId,
       mode: incremental ? "incremental" : start === 1 && end === total ? "full" : "selected_range",
       totalMessages: total,
       exportedMessages: messages.length,
@@ -117,8 +112,7 @@ function selectedConversation() {
       showMessageNumbers: true,
       firstMessageId: messages[0]?.sourceId || null,
       lastMessageId: messages[messages.length - 1]?.sourceId || null,
-      previousExportId: previous?.exportId || null,
-      previousMessageId: previous?.lastMessageId || null,
+      previousMessageId: previous?.lastExportedMessageId || null,
       contextMessages,
       newMessages: incremental ? end - selectedStart + 1 : messages.length
     }
@@ -126,9 +120,7 @@ function selectedConversation() {
 }
 
 function latestConversationExport() {
-  return exportHistory
-    .filter((entry) => entry.sourceUrl === conversation.url && entry.lastMessageId)
-    .sort((a, b) => String(b.exportedAt).localeCompare(String(a.exportedAt)))[0] || null;
+  return exportPositions[conversationKey()] || null;
 }
 
 function applyIncrementalMode() {
@@ -145,11 +137,11 @@ function applyIncrementalMode() {
   const previous = latestConversationExport();
   if (!previous) {
     checkbox.checked = false;
-    showIncrementalStatus("差分エクスポートを適用できませんでした。\n\nこの会話には、安定したメッセージIDを持つ前回履歴がありません。\n全文または手動範囲を選択してください。", true);
+    showIncrementalStatus("差分エクスポートを適用できませんでした。\n\nこの会話には、前回のダウンロード位置が記憶されていません。\n全文または手動範囲を選択してください。", true);
     return;
   }
 
-  const previousIndex = conversation.messages.findIndex((message) => message.sourceId === previous.lastMessageId);
+  const previousIndex = conversation.messages.findIndex((message) => message.sourceId === previous.lastExportedMessageId);
   if (previousIndex < 0) {
     checkbox.checked = false;
     showIncrementalStatus("差分エクスポートを適用できませんでした。\n\n前回の最終メッセージが現在の会話内に見つかりません。会話の編集、回答の再生成、分岐変更などが原因として考えられます。\n全文または手動範囲を選択してください。", true);
@@ -167,7 +159,7 @@ function applyIncrementalMode() {
   const newCount = conversation.messages.length - previousIndex - 1;
   showIncrementalStatus(
     `差分エクスポート\n\n前回の末尾: ${new Date(previous.exportedAt).toLocaleString("ja-JP")}\n`
-    + `Message: ${String(previous.lastMessageId).slice(0, 24)}\n今回追加: ${newCount} messages`,
+    + `Message: ${String(previous.lastExportedMessageId).slice(0, 24)}\n今回追加: ${newCount} messages`,
     false
   );
   renderPreview();
@@ -181,70 +173,6 @@ function showIncrementalStatus(message, isError) {
   status.hidden = false;
   status.classList.toggle("error", isError);
   status.textContent = message;
-}
-
-function renderHistoryOptions() {
-  const projectNames = Array.from(new Set(exportHistory.map((entry) => entry.project).filter(Boolean))).sort();
-  document.getElementById("project-names").replaceChildren(...projectNames.map((name) => {
-    const option = document.createElement("option");
-    option.value = name;
-    return option;
-  }));
-
-}
-
-async function persistHistory() {
-  exportHistory = exportHistory.slice(0, 500);
-  await chrome.storage.local.set({ exportHistory });
-  renderHistoryOptions();
-  renderHistoryList();
-}
-
-function renderHistoryList() {
-  document.getElementById("history-count").textContent = `保存件数: ${exportHistory.length} / 500`;
-  const container = document.getElementById("history-list");
-  container.replaceChildren(...exportHistory.map((entry) => {
-    const item = document.createElement("div");
-    item.className = "history-item";
-    const title = document.createElement("div");
-    title.className = "history-title";
-    title.textContent = `${String(entry.exportedAt).slice(0, 16).replace("T", " ")} · ${entry.fileName}`;
-
-    const fields = document.createElement("div");
-    fields.className = "history-fields";
-    const projectInput = document.createElement("input");
-    projectInput.value = entry.project || "";
-    projectInput.placeholder = "プロジェクト";
-    const typeSelect = document.createElement("select");
-    [["", "未指定"], ["design", "設計"], ["implementation", "実装"], ["research", "調査"], ["brainstorming", "壁打ち"], ["minutes", "議事録"], ["other", "その他"]]
-      .forEach(([value, label]) => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = label;
-        option.selected = entry.type === value;
-        typeSelect.appendChild(option);
-      });
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "small-button danger-button";
-    deleteButton.textContent = "削除";
-
-    const update = async () => {
-      entry.project = projectInput.value.trim();
-      entry.type = typeSelect.value;
-      await persistHistory();
-    };
-    projectInput.addEventListener("change", update);
-    typeSelect.addEventListener("change", update);
-    deleteButton.addEventListener("click", async () => {
-      if (!window.confirm("このエクスポート履歴を削除しますか。会話ファイル自体は削除されません。")) return;
-      exportHistory = exportHistory.filter((candidate) => candidate.exportId !== entry.exportId);
-      await persistHistory();
-    });
-    fields.append(projectInput, typeSelect, deleteButton);
-    item.append(title, fields);
-    return item;
-  }));
 }
 
 function renderRangeSummary(selected) {
@@ -378,25 +306,16 @@ async function downloadMarkdown() {
       filename,
       saveAs: true
     });
-    const historyEntry = {
-      exportId: currentExportConversation.exportInfo.exportId,
-      exportedAt: new Date().toISOString(),
-      source: currentExportConversation.source,
-      sourceUrl: currentExportConversation.url,
-      title: currentExportConversation.title,
-      project: currentExportConversation.project?.name || "",
-      type: currentExportConversation.project?.type || "",
-      fileName: filename,
-      rangeStart: currentExportConversation.exportInfo.start,
-      rangeEnd: currentExportConversation.exportInfo.end,
-      firstMessageId: currentExportConversation.exportInfo.firstMessageId,
-      lastMessageId: currentExportConversation.exportInfo.lastMessageId
-    };
-    exportHistory = [historyEntry, ...exportHistory.filter((entry) => entry.exportId !== historyEntry.exportId)].slice(0, 500);
-    await chrome.storage.local.set({ exportHistory });
-    pendingExportId = crypto.randomUUID();
-    renderHistoryOptions();
-    renderHistoryList();
+    if (document.getElementById("remember-position").checked) {
+      const key = conversationKey();
+      exportPositions[key] = {
+        conversationId: key.slice(key.indexOf(":") + 1),
+        lastExportedMessageId: currentExportConversation.exportInfo.lastMessageId,
+        exportedAt: new Date().toISOString(),
+        lastExportMode: currentExportConversation.exportInfo.mode
+      };
+      await chrome.storage.local.set({ exportPositions });
+    }
     renderPreview();
   } finally {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -404,8 +323,28 @@ async function downloadMarkdown() {
 }
 
 async function initialize() {
-  const stored = await chrome.storage.local.get(["handoffTemplate", "exportHistory"]);
-  exportHistory = Array.isArray(stored.exportHistory) ? stored.exportHistory : [];
+  const stored = await chrome.storage.local.get(["handoffTemplate", "exportPositions", "exportHistory"]);
+  exportPositions = stored.exportPositions && typeof stored.exportPositions === "object"
+    ? stored.exportPositions
+    : {};
+
+  if (Array.isArray(stored.exportHistory)) {
+    stored.exportHistory.forEach((entry) => {
+      if (!entry.sourceUrl || !entry.lastMessageId) return;
+      const key = conversationKey(entry.source || "unknown", entry.sourceUrl);
+      const current = exportPositions[key];
+      if (!current || String(entry.exportedAt) > String(current.exportedAt)) {
+        exportPositions[key] = {
+          conversationId: key.slice(key.indexOf(":") + 1),
+          lastExportedMessageId: entry.lastMessageId,
+          exportedAt: entry.exportedAt,
+          lastExportMode: entry.mode || "unknown"
+        };
+      }
+    });
+    await chrome.storage.local.set({ exportPositions });
+    await chrome.storage.local.remove("exportHistory");
+  }
   conversation = await getConversation();
 
   if (!conversation) {
@@ -420,9 +359,6 @@ async function initialize() {
   document.getElementById("range-end").value = String(conversation.messages.length);
   document.getElementById("range-start").max = String(conversation.messages.length);
   document.getElementById("range-end").max = String(conversation.messages.length);
-  renderHistoryOptions();
-  renderHistoryList();
-
   renderWarnings();
   renderMetadata();
   renderConfidence();
@@ -466,18 +402,5 @@ document.getElementById("reset-range-button").addEventListener("click", () => {
 });
 document.getElementById("incremental-mode").addEventListener("change", applyIncrementalMode);
 document.getElementById("include-context").addEventListener("change", renderPreview);
-[
-  "project-name",
-  "conversation-type"
-].forEach((id) => document.getElementById(id).addEventListener("change", renderPreview));
-document.getElementById("project-name").addEventListener("input", () => {
-  renderHistoryOptions();
-  renderPreview();
-});
-document.getElementById("clear-history-button").addEventListener("click", async () => {
-  if (!exportHistory.length || !window.confirm("すべてのエクスポート履歴を消去しますか。ダウンロード済みファイルは削除されません。")) return;
-  exportHistory = [];
-  await persistHistory();
-});
 
 initialize();

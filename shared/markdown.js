@@ -21,11 +21,9 @@ function buildFrontmatter(conversation) {
     start: 1,
     end: conversation.messages.length
   };
-  const project = conversation.project || {};
   const lines = [
     "---",
     `schema_version: "0.3"`,
-    `export_id: ${yamlEscape(exportInfo.exportId || "")}`,
     `exported_at: ${yamlEscape(conversation.exportedAt)}`,
     "source:",
     `  service: ${yamlEscape(conversation.source)}`,
@@ -33,9 +31,6 @@ function buildFrontmatter(conversation) {
     `  url: ${yamlEscape(conversation.url || "")}`,
     `  title: ${yamlEscape(conversation.title || "Untitled Conversation")}`,
     `  language: ${yamlEscape(conversation.language || detectLanguage(conversation.title || ""))}`,
-    "classification:",
-    `  project: ${yamlEscape(project.name || "")}`,
-    `  type: ${yamlEscape(project.type || "")}`,
     "extraction:",
     `  source: ${conversation.diagnostics?.data_source || conversation.extraction?.source || "unknown"}`,
     `  confidence: ${conversation.extraction?.confidence || "unknown"}`,
@@ -46,7 +41,6 @@ function buildFrontmatter(conversation) {
     `  range_end: ${exportInfo.end}`,
     `  first_message_id: ${yamlEscape(exportInfo.firstMessageId || "")}`,
     `  last_message_id: ${yamlEscape(exportInfo.lastMessageId || "")}`,
-    `  previous_export_id: ${yamlEscape(exportInfo.previousExportId || "")}`,
     `  previous_last_message_id: ${yamlEscape(exportInfo.previousMessageId || "")}`,
     `  context_messages: ${exportInfo.contextMessages || 0}`,
     `  exported_messages: ${exportInfo.exportedMessages}`,
@@ -67,7 +61,6 @@ function renderMetadata(conversation) {
     "",
     `- Source: ${conversation.source}`,
     `- URL: ${conversation.url || ""}`,
-    `- Project: ${conversation.project?.name || "Unclassified"}`,
     `- Export Mode: ${exportInfo.mode || "full"}`,
     `- Exported Messages: ${exportInfo.exportedMessages} of ${exportInfo.totalMessages}`,
     `- Extraction Confidence: ${conversation.extraction?.confidence || "unknown"}`

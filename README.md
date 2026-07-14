@@ -168,6 +168,7 @@ v0.4の開発前に、1週間は新機能を追加せず、実作業で検証し
 
 ## ディレクトリ構成
 
+- `.agents/skills/llm-handoff-ui/`: UI改善時の情報設計・アクセシビリティ基準
 - `background/`: 一時データとChatGPT取得
 - `content/`: 抽出処理のオーケストレーション
 - `extractors/`: ChatGPT／Claude固有の取得と共通形式への正規化

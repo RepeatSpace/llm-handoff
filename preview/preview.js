@@ -457,9 +457,9 @@ async function initialize() {
   renderPreview();
 }
 
-document.getElementById("refresh-button").addEventListener("click", renderPreview);
 document.getElementById("copy-button").addEventListener("click", copyMarkdown);
 document.getElementById("download-button").addEventListener("click", downloadMarkdown);
+document.getElementById("handoff-input").addEventListener("input", renderPreview);
 document.getElementById("handoff-preset").addEventListener("change", (event) => {
   const preset = HANDOFF_PRESETS[event.target.value];
   if (preset) {

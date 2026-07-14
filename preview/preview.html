@@ -15,19 +15,65 @@
         </div>
         <div id="warnings" class="warnings" hidden></div>
         <dl id="conversation-meta" class="meta"></dl>
-        <label class="field">
-          <span>Handoff Instructions</span>
-          <select id="handoff-preset">
-            <option value="">プリセットを選択</option>
-            <option value="continue">続きから作業する</option>
-            <option value="organize">まず整理する</option>
-            <option value="codex">Codex向け</option>
-            <option value="claude-code">Claude Code向け</option>
-          </select>
-          <textarea id="handoff-input" rows="6"></textarea>
-        </label>
-        <details class="project-panel">
-          <summary>プロジェクト設定</summary>
+        <section class="range-panel" aria-labelledby="range-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Export</p>
+              <h2 id="range-heading">出力範囲</h2>
+            </div>
+            <button id="reset-range-button" class="text-button" type="button">すべて選択</button>
+          </div>
+          <label class="checkbox-field incremental-toggle">
+            <input id="incremental-mode" type="checkbox">
+            前回のエクスポート以降だけを選択
+          </label>
+          <label class="checkbox-field context-toggle">
+            <input id="include-context" type="checkbox" checked disabled>
+            直前の会話も文脈として含める
+          </label>
+          <div id="incremental-status" class="incremental-status" hidden></div>
+          <div class="range-inputs">
+            <label><span>開始</span><input id="range-start" type="number" min="1"></label>
+            <span class="range-separator" aria-hidden="true">—</span>
+            <label><span>終了</span><input id="range-end" type="number" min="1"></label>
+          </div>
+          <div id="range-summary" class="range-summary"></div>
+          <details class="message-picker">
+            <summary>メッセージから範囲を選ぶ</summary>
+            <label class="field compact-field">
+              <span>メッセージを検索</span>
+              <input id="message-search" type="search" placeholder="キーワードを入力">
+            </label>
+            <label class="checkbox-field">
+              <input id="user-only" type="checkbox">
+              ユーザーメッセージだけ表示
+            </label>
+            <div id="message-results" class="message-results"></div>
+          </details>
+        </section>
+        <section class="handoff-panel" aria-labelledby="handoff-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Instructions</p>
+              <h2 id="handoff-heading">次のAIへの指示</h2>
+            </div>
+            <select id="handoff-preset" aria-label="指示のプリセット">
+              <option value="">プリセット</option>
+              <option value="continue">続きから作業する</option>
+              <option value="organize">まず整理する</option>
+              <option value="codex">Codex向け</option>
+              <option value="claude-code">Claude Code向け</option>
+            </select>
+          </div>
+          <textarea id="handoff-input" rows="6" aria-label="次のAIへの指示"></textarea>
+        </section>
+        <div class="actions">
+          <button id="download-button" class="primary-action" type="button">Markdownをダウンロード</button>
+          <button id="copy-button" class="secondary-action" type="button">全文をコピー</button>
+        </div>
+        <p id="copy-status" class="action-status" role="status" aria-live="polite"></p>
+        <details class="project-panel advanced-panel">
+          <summary>プロジェクト情報</summary>
           <label class="field compact-field">
             <span>プロジェクト名</span>
             <input id="project-name" type="text" list="project-names" placeholder="例: llm-handoff">
@@ -55,37 +101,8 @@
               <option value="">なし</option>
             </select>
           </label>
-          <label class="checkbox-field">
-            <input id="incremental-mode" type="checkbox">
-            この会話の前回エクスポート以降だけを選択
-          </label>
-          <label class="checkbox-field">
-            <input id="include-context" type="checkbox" checked disabled>
-            差分の直前にある最大2メッセージを含める
-          </label>
-          <div id="incremental-status" class="incremental-status" hidden></div>
         </details>
-        <section class="range-panel" aria-labelledby="range-heading">
-          <div class="section-heading">
-            <h2 id="range-heading">出力範囲</h2>
-            <button id="reset-range-button" class="small-button" type="button">全文へ戻す</button>
-          </div>
-          <div class="range-inputs">
-            <label>開始 <input id="range-start" type="number" min="1"></label>
-            <label>終了 <input id="range-end" type="number" min="1"></label>
-          </div>
-          <label class="field compact-field">
-            <span>メッセージを検索</span>
-            <input id="message-search" type="search" placeholder="キーワードを入力">
-          </label>
-          <label class="checkbox-field">
-            <input id="user-only" type="checkbox">
-            ユーザーメッセージだけ表示
-          </label>
-          <div id="range-summary" class="range-summary"></div>
-          <div id="message-results" class="message-results"></div>
-        </section>
-        <details class="history-panel">
+        <details class="history-panel advanced-panel">
           <summary>エクスポート履歴</summary>
           <div class="history-actions">
             <button id="clear-history-button" class="small-button danger-button" type="button">全履歴を消去</button>
@@ -94,15 +111,13 @@
           <p id="history-count" class="field-help"></p>
           <div id="history-list" class="history-list"></div>
         </details>
-        <div class="actions">
-          <button id="refresh-button" type="button">プレビューを更新</button>
-          <button id="copy-button" type="button">Markdown 全文をコピー</button>
-          <button id="download-button" type="button">Markdown をダウンロード</button>
-        </div>
-        <p id="copy-status" class="action-status" role="status" aria-live="polite"></p>
       </section>
       <section class="panel preview">
-        <pre id="preview-output"></pre>
+        <div class="preview-toolbar">
+          <span>Markdown preview</span>
+          <span>編集内容は左側へ反映されます</span>
+        </div>
+        <pre id="preview-output" tabindex="0"></pre>
       </section>
     </main>
     <script src="../shared/types.js"></script>
